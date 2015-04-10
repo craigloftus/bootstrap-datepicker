@@ -313,6 +313,7 @@
 				o.defaultViewDate = UTCToday();
 			}
 			o.showOnFocus = o.showOnFocus !== undefined ? o.showOnFocus : true;
+			o.showOnClick = o.showOnClick !== undefined ? o.showOnClick : true;
 		},
 		_events: [],
 		_secondaryEvents: [],
@@ -358,30 +359,30 @@
                 events.focus = $.proxy(this.show, this);
             }
 
-            if (this.isInput) { // single input
-                this._events = [
-                    [this.element, events]
-                ];
+            if (this.o.showOnClick === true) {
+                if (this.isInput) { // single input
+                    this._events = [
+                        [this.element, events]
+                    ];
+                }
+                else if (this.component && this.hasInput) { // component: input + button
+                    this._events = [
+                        // For components that are not readonly, allow keyboard nav
+                        [this.element.find('input'), events],
+                        [this.component, {
+                            click: $.proxy(this.show, this)
+                        }]
+                    ];
+                }
+                else {
+                    this._events = [
+                        [this.element, {
+                            click: $.proxy(this.show, this)
+                        }]
+                    ];
+                }
             }
-            else if (this.component && this.hasInput) { // component: input + button
-                this._events = [
-                    // For components that are not readonly, allow keyboard nav
-                    [this.element.find('input'), events],
-                    [this.component, {
-                        click: $.proxy(this.show, this)
-                    }]
-                ];
-            }
-			else if (this.element.is('div')){  // inline datepicker
-				this.isInline = true;
-			}
-			else {
-				this._events = [
-					[this.element, {
-						click: $.proxy(this.show, this)
-					}]
-				];
-			}
+
 			this._events.push(
 				// Component: listen for blur on element descendants
 				[this.element, '*', {
